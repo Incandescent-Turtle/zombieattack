@@ -8,8 +8,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.Random;
 
+import game.zombieattack.main.Game;
 import game.zombieattack.main.GameObject;
-import game.zombieattack.main.handlers.GameObjectHandler;
 import game.zombieattack.main.util.Util;
 
 public class Grenade extends GameObject {
@@ -19,8 +19,9 @@ public class Grenade extends GameObject {
 	private byte ticksExploding = 0;
 	private boolean blowingUp = false;
 	
-	public Grenade(Player player, GameObjectHandler handler) {
-		super(player.getX(), player.getY(), 20, 20, handler);
+	public Grenade(Game game) 
+	{
+		super(game.getPlayer().getX(), game.getPlayer().getY(), 20, 20, game);
 		this.angle = atan2(mouseX - xPos, mouseY - yPos); 
 	}
 

@@ -1,11 +1,11 @@
 package game.zombieattack.main.handlers;
 
-import game.zombieattack.main.Combustable;  
+import game.zombieattack.main.Combustable;
 import game.zombieattack.main.GameObject;
-import game.zombieattack.main.objects.Bullet;
 import game.zombieattack.main.objects.Grenade;
 import game.zombieattack.main.objects.GroundItem;
 import game.zombieattack.main.objects.Player;
+import game.zombieattack.main.objects.gunstuff.Bullet;
 import game.zombieattack.main.objects.zombies.AbstractZombie;
 
 //handles collisions with GameObjects
@@ -38,10 +38,11 @@ public class CollisionHandler {
 				if(areTouching(firstObject, AbstractZombie.class, secondObject, Bullet.class))
 				{
 					AbstractZombie zombie = (AbstractZombie) firstObject;
+					Bullet bullet = (Bullet) secondObject;
 					//removes bullet
-					handler.removeObject(secondObject);
+					handler.removeObject(bullet);
 					//damages zombie
-					zombie.damage(handler.getPlayer().getDamgage(), secondObject);
+					zombie.damage(bullet.getGun().getDamage(), secondObject);
 				}
 				//when the player picks up an item
 				if(areTouching(firstObject, Player.class, secondObject, GroundItem.class))

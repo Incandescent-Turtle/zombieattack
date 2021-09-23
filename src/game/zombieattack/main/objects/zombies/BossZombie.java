@@ -8,9 +8,10 @@ import java.awt.Rectangle;
 import game.zombieattack.main.Game;
 import game.zombieattack.main.GameObject;
 import game.zombieattack.main.handlers.GameObjectHandler;
-import game.zombieattack.main.objects.Bullet;
 import game.zombieattack.main.objects.Grenade;
 import game.zombieattack.main.objects.Player;
+import game.zombieattack.main.objects.gunstuff.Bullet;
+import game.zombieattack.main.util.Textures;
 import game.zombieattack.main.util.Util;
 
 public class BossZombie extends AbstractZombie
@@ -20,14 +21,7 @@ public class BossZombie extends AbstractZombie
 	
 	public BossZombie(Point pos, Player player, Game game, GameObjectHandler handler)
 	{
-		super(pos, player, game, handler, Color.ORANGE, ZombieType.BOSS, 10, 20, 2, 25, 100, 100);
-	}
-
-	@Override
-	protected void drawZombie(Graphics2D g) 
-	{
-		g.fill(Util.newCircle(xPos-width/2, yPos-height/2, width, height));
-		g.drawString(health + "", 100, 100);
+		super(pos, player, game, handler, Textures.BOSS_ZOMBIE, ZombieType.BOSS, 5, 20, 2, 25, 100);
 	}
 
 	@Override

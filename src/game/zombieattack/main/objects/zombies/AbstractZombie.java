@@ -1,11 +1,12 @@
  package game.zombieattack.main.objects.zombies;
 
-import static java.lang.Math.atan2; 
+import static java.lang.Math.atan2;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 
 import game.zombieattack.main.Combustable;
 import game.zombieattack.main.Game;
@@ -25,8 +26,6 @@ public abstract class AbstractZombie extends GameObject implements Combustable
 	protected int ticksRecovering, ticksToRecover;
 	//time in between swings at the player, time since last hit player
 	protected int attackCoolDownTicks, ticksSinceLastHitPlayer;
-	//the normal colour this zombie is displayed as
-	protected Color zombieColor;
 	protected Player player;
 	//angle towards player
 	protected double angle;
@@ -34,53 +33,49 @@ public abstract class AbstractZombie extends GameObject implements Combustable
 	protected boolean recovering = false, onAttackCoolDown = false;
 	protected Game game;
 	public ZombieType type;
+	private BufferedImage texture;
 	
 	public enum ZombieType 
 	{
 		REGULAR,
 		BOSS;
 	}
-
 	
-	public AbstractZombie(double xPos, double yPos, Player player, Game game, GameObjectHandler handler, Color color, ZombieType type, int recoveryTicks, int attackCoolDownTicks, int speed, int damage, int size, int maxHealth) 
+	public AbstractZombie(Point2D.Double pos, Player player, Game game, GameObjectHandler handler, BufferedImage texture, ZombieType type, int recoveryTicks, int attackCoolDownTicks, int speed, int damage, int maxHealth)
 	{
-		super(xPos, yPos, size, handler);
+		super(pos.getX(), pos.getY(), texture.getWidth(), game);
 		this.player = player;
 		this.speed = speed;
 		this.damage = damage;
 		this.maxHealth = maxHealth;
 		this.health = maxHealth;
-		this.zombieColor = color;
 		this.game = game;
 		this.type = type;
 		this.ticksToRecover = recoveryTicks;
-		this.attackCoolDownTicks = attackCoolDownTicks;
-	}
+		this.attackCoolDownTicks = attackCoolDownTicks;	
+		this.texture = texture;
+		}
 	
-	public AbstractZombie(Point2D.Double pos, Player player, Game game, GameObjectHandler handler, Color color, ZombieType type, int recoveryTicks, int attackCoolDownTicks, int speed, int damage, int size, int maxHealth)
+	public AbstractZombie(Point pos, Player player, Game game, GameObjectHandler handler, BufferedImage texture, ZombieType type, int recoveryTicks, int attackCoolDownTicks, int speed, int damage, int maxHealth)
 	{
-		this(pos.getX(), pos.getY(), player, game, handler, color, type, recoveryTicks, attackCoolDownTicks, speed, damage, size, maxHealth);
-	}
-	
-	public AbstractZombie(Point pos, Player player, Game game, GameObjectHandler handler, Color color, ZombieType type, int recoveryTicks, int attackCoolDownTicks, int speed, int damage, int size, int maxHealth)
-	{
-		this(pos.getX(), pos.getY(), player, game, handler, color, type, recoveryTicks, attackCoolDownTicks, speed, damage, size, maxHealth);
+		this(new Point.Double(pos.x, pos.y), player, game, handler, texture, type, recoveryTicks, attackCoolDownTicks, speed, damage, maxHealth);
 	}
 	
 	//overriden from GameObject, called every game render
 	@Override
 	public void render(Graphics2D g) 
 	{
-		//sets colour, if recovering it is white, otherwise it is its normal colour
-		g.setColor(recovering ? Color.WHITE : zombieColor);
-		//draws zombie
-		drawZombie(g);
+		g.drawImage(texture, (int) (xPos-width/2), (int) (yPos-height/2), null);
+		//sets colour, if recovering it is white, otherwise it shows texture
+		if(recovering)
+		{
+			g.setColor(Color.WHITE);
+			g.fill(Util.newCircle(xPos-width/2, yPos-height/2, width, height));
+		}
 		//draws the healthbar
 		drawHealthBar(g);
 	}
 	
-	//for easy implementation. Called from the render method
-	protected abstract void drawZombie(Graphics2D g);
 	//for easy implementation. Called from the render method
 	protected abstract void drawHealthBar(Graphics2D g);
 	

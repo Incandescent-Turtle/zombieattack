@@ -1,6 +1,6 @@
 package game.zombieattack.main.handlers;
 
-import java.awt.Point;
+import java.awt.Point; 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Random;
@@ -24,7 +24,7 @@ public class KeyInputHandler extends KeyAdapter {
 		this.handler = handler;
 		this.game  = game;
 	}
-	
+		
 	//extends from KeyAdapter
 	@Override
 	public void keyPressed(KeyEvent e)
@@ -55,6 +55,9 @@ public class KeyInputHandler extends KeyAdapter {
 				handler.addObject(new BossZombie(new Point(rand.nextInt(Game.WIDTH), rand.nextInt(Game.HEIGHT)), handler.getPlayer(), game, handler));
 				break;
 				
+			case KeyEvent.VK_F:
+				game.changeMoney(14140);
+				break;
 			case KeyEvent.VK_F11:
 				changeFullScreen = !changeFullScreen;
 				

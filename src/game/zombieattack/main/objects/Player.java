@@ -1,15 +1,16 @@
 package game.zombieattack.main.objects;
 
-import java.awt.Color;  
+import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 
 import game.zombieattack.main.Controllable;
 import game.zombieattack.main.Game;
 import game.zombieattack.main.GameObject;
-import game.zombieattack.main.handlers.GameObjectHandler;
-import game.zombieattack.main.util.Mouse;
+import game.zombieattack.main.objects.gunstuff.AbstractGun;
+import game.zombieattack.main.objects.gunstuff.MachineGun;
+import game.zombieattack.main.objects.gunstuff.Pistol;
+import game.zombieattack.main.util.Textures;
 import game.zombieattack.main.util.Util;
 
 //the main player / survivor in game
@@ -18,28 +19,28 @@ public class Player extends GameObject implements Controllable
 {
 	//used to determine whether or not keys are pressed
 	private boolean upPressed, downPressed, leftPressed, rightPressed, spacePressed, qPressed; 
-	//the size of the player
-	private int size;
 	//health
 	private int maxHealth = 100, health = maxHealth;
-	//gun stats
-	private int fireSpeed = 20, bulletDamage = 1, ticksSinceLastShotBullet = fireSpeed;
-	private double movementSpeed = 5, velX, velY, bulletSpeed;
+
+	private double movementSpeed = 5, velX, velY;
 	//grenade stuff
 	private int grenadeCount = 10, maxGrenadeCount = 10, ticksSinceLastLaunchedGrenade = 40;
-	//gun the player is holding
-	@SuppressWarnings("unused")
-	private Gun gun;
-	//used to differentiate between the gun being used
-	private enum Gun
-	{
-		PISTOL,
-		MACHINE_GUN;
-	}
+	//size
+	public static final int SIZE = 50;	
+	private final AbstractGun guns[];
+	private final Pistol pistol;
+	private final MachineGun machineGun;
 	
-	public Player(int x, int y, int size, GameObjectHandler handler) {
-		super(x, y, size, handler);
-		this.size = size;
+	private AbstractGun currentGun; 
+	
+	public Player(int x, int y, Game game) {
+		super(x, y, SIZE, game);
+		guns = new AbstractGun[] 
+		{
+				pistol = new Pistol(game, this),
+				machineGun = new MachineGun(game, this)
+		};
+		currentGun = guns[1];
 	}
 
 	//tick method overriden from GameObject called in handler every tick
@@ -56,22 +57,19 @@ public class Player extends GameObject implements Controllable
 		//keeps the player in bounds
 		xPos = Util.clamp(xPos+velX, width/2, Game.WIDTH-width/2);
 		yPos = Util.clamp(yPos+velY, height/2, Game.HEIGHT-height/2);
-		//shoots
-		ticksSinceLastShotBullet++;
-		ticksSinceLastLaunchedGrenade++;
-		if(spacePressed && ticksSinceLastShotBullet >= fireSpeed || Mouse.mouseDown && ticksSinceLastShotBullet >= fireSpeed) 
-		{
-			shootBullet();
-			ticksSinceLastShotBullet = 0;
-		}
+		//tries to shoot a bullet
+		if(spacePressed) currentGun.tryShootBullet();
 		
-		if(qPressed && ticksSinceLastLaunchedGrenade >= 50 && grenadeCount > 0)
-		{
-			launchGrenade();
-			ticksSinceLastLaunchedGrenade = 0;
-		}
+		//tries to throw nade
+		tryLaunchGrenade();
+		
 		//keeps the value between the specified values
 		health = health > maxHealth ? maxHealth : health;
+		
+		currentGun.tick();
+		
+		//ends the game if the player dies
+		if(health <= 0) game.endGame();
 	}
 
 	//tick method overriden from GameObject called in handler every tick
@@ -79,126 +77,104 @@ public class Player extends GameObject implements Controllable
 	public void render(Graphics2D g) 
 	{
 		//draws tank barrel
-		Graphics2D g2d = (Graphics2D) g.create();
-		g2d.setColor(Color.DARK_GRAY);
-		Rectangle barrel = new Rectangle(0-5, 0, 10, 50);
-		double angle = Math.atan2(xPos - Mouse.mouseX, yPos - Mouse.mouseY)+135;
-		g2d.translate(xPos, yPos);
-		g2d.rotate(-angle);
-		g2d.draw(barrel);
-		g2d.fill(barrel);
-		g2d.dispose();
+		currentGun.render(g);
 		
 		//draws player
 		g.setColor(Color.BLACK);
-		g.fill(Util.newCircle(xPos-width/2, yPos-height/2, width, height));
+		g.drawImage(Textures.PLAYER, (int) (xPos-width/2), (int) (yPos-height/2), null);
 	}
 
 	@Override
-	public void keyPressed(int key) {
-		//checks key presses and sets the booleans
-		switch(key)
-		{
-			case KeyEvent.VK_W:
-			case KeyEvent.VK_UP:
-				upPressed = true;
-				break;
-			
-			case KeyEvent.VK_S:
-			case KeyEvent.VK_DOWN:
-				downPressed = true;
-				break;
-				
-			case KeyEvent.VK_A:
-			case KeyEvent.VK_LEFT:
-				leftPressed = true;
-				break;
-			
-			case KeyEvent.VK_D:
-			case KeyEvent.VK_RIGHT:
-				rightPressed = true;
-				break;
-				
-			case KeyEvent.VK_SPACE:
-				spacePressed = true;
-				break;
-				
-			case KeyEvent.VK_Q:
-				qPressed = true;
-				break;
-		}
-	}
-
-	@Override
-	public void keyReleased(int key) {
-		//checks key presses and sets the booleans
-		switch(key)
-		{
-			case KeyEvent.VK_W:
-			case KeyEvent.VK_UP:
-				upPressed = false;
-				break;
-				
-			case KeyEvent.VK_S:
-			case KeyEvent.VK_DOWN:
-				downPressed = false;
-				break;
-				
-			case KeyEvent.VK_A:
-			case KeyEvent.VK_LEFT:
-				leftPressed = false;
-				break;
-				
-			case KeyEvent.VK_D:
-			case KeyEvent.VK_RIGHT:
-				rightPressed = false;
-				break;
-				
-			case KeyEvent.VK_SPACE:
-				spacePressed = false;
-				break;
-				
-			case KeyEvent.VK_Q:
-				qPressed = false;
-				break;
-		}
-	}
-	
-	//called when a bullet is shot, creates a bullet
-	private void shootBullet()
+	public void keyPressed(int key) 
 	{
-		handler.addObject(new Bullet(this, handler, 10, 0, bulletSpeed));
+		updateKeyBindings(key, true);
+		if(key == KeyEvent.VK_E) nextGun();
 	}
+
+	@Override
+	public void keyReleased(int key) 
+	{
+		updateKeyBindings(key, false);
+	}	
 	
+	private void nextGun()
+	{
+		if(!(currentGun.equals(guns[guns.length-1])))
+		{
+			for (int i = 0; i < guns.length-1; i++) 
+				if (currentGun.equals(guns[i])) 
+					currentGun = guns[i+1];
+		} else {
+			currentGun = guns[0];
+		}
+	}
 	//called when a grenade is launched, creates a grenade
 	private void launchGrenade() 
 	{
-		handler.addObject(new Grenade(this, handler));
+		handler.addObject(new Grenade(game));
 		grenadeCount--;
 	}
 	
+	private void tryLaunchGrenade()
+	{
+		ticksSinceLastLaunchedGrenade++;
+		if(qPressed && ticksSinceLastLaunchedGrenade >= 50 && grenadeCount > 0)
+		{
+			launchGrenade();
+			ticksSinceLastLaunchedGrenade = 0;
+		}
+	}
+	
+	private void updateKeyBindings(int key, boolean pressed)
+	{
+		//checks key presses and sets the booleans
+		switch(key)
+		{
+			case KeyEvent.VK_W:
+			case KeyEvent.VK_UP:
+				upPressed = pressed;
+				break;
+				
+			case KeyEvent.VK_S:
+			case KeyEvent.VK_DOWN:
+				downPressed = pressed;
+				break;
+				
+			case KeyEvent.VK_A:
+			case KeyEvent.VK_LEFT:
+				leftPressed = pressed;
+				break;
+				
+			case KeyEvent.VK_D:
+			case KeyEvent.VK_RIGHT:
+				rightPressed = pressed;
+				break;
+				
+			case KeyEvent.VK_SPACE:
+				spacePressed = pressed;
+				break;
+				
+			case KeyEvent.VK_Q:
+				qPressed = pressed;
+				break;
+		}
+	}
 	public void reset()
 	{
-		movementSpeed = 5;
-		bulletDamage = 1;
+		movementSpeed = 3.5;
 		maxHealth = 100;
 		health = maxHealth;
 		xPos = Game.WIDTH/2;
 		yPos = Game.HEIGHT/2;
-		fireSpeed = 20;
-		bulletSpeed = 15;
 		maxGrenadeCount = grenadeCount = 10;
-		gun = Gun.PISTOL;
+		for(AbstractGun gun : guns)
+		{
+			gun.reset();
+		}
 	}
 	/*
 	 * Getters and setters
 	 */
-	
-	public int getSize()
-	{
-		return size;
-	}
-	
 	public int getHealth()
 	{
 		return health;
@@ -223,21 +199,6 @@ public class Player extends GameObject implements Controllable
 	{
 		movementSpeed+=change;
 	}
-	
-	public int getDamgage()
-	{
-		return bulletDamage;
-	}
-	
-	public void setDamage(int damage)
-	{
-		this.bulletDamage = damage;
-	}
-	
-	public void changeDamage(int amount)
-	{
-		bulletDamage+=bulletDamage;
-	}
 
 	public int getMaxHealth() {
 		return maxHealth;
@@ -246,16 +207,6 @@ public class Player extends GameObject implements Controllable
 	public void changeMaxHealth(int amount)
 	{
 		maxHealth += amount;
-	}
-	
-	public void changeBulletSpeed(double amount)
-	{
-		bulletSpeed += amount;
-	}
-	
-	public void changeFireSpeed(int amount)
-	{
-		fireSpeed += amount;
 	}
 	
 	public int getGrenadeCount()
@@ -271,5 +222,20 @@ public class Player extends GameObject implements Controllable
 	public void changeGrenadeCount(int amount)
 	{
 		grenadeCount = (int) Util.clamp(grenadeCount + amount, 0, maxGrenadeCount);
+	}
+	
+	public Pistol getPistol()
+	{
+		return pistol;
+	}
+	
+	public MachineGun getMachineGun()
+	{
+		return machineGun;
+	}
+	
+	public AbstractGun getCurrentGun()
+	{
+		return currentGun;
 	}
 }

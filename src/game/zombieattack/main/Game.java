@@ -13,18 +13,18 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 
-import game.zombieattack.main.factories.GroundItemFactory;
-import game.zombieattack.main.factories.ZombieFactory;
 import game.zombieattack.main.handlers.GameObjectHandler;
 import game.zombieattack.main.handlers.KeyInputHandler;
 import game.zombieattack.main.handlers.MenuHandler;
 import game.zombieattack.main.hud.PlayerHUD;
 import game.zombieattack.main.objects.Player;
+import game.zombieattack.main.spawners.GroundItemSpawner;
+import game.zombieattack.main.spawners.ZombieSpawner;
 import game.zombieattack.main.util.Mouse;
 import game.zombieattack.main.util.Util;
 //the main class
-public class Game extends Canvas implements Runnable {
-
+public class Game extends Canvas implements Runnable 
+{
 	private static final long serialVersionUID = 1L;
 	public static  int WIDTH = 1200, HEIGHT = WIDTH/12*9-210;
 	
@@ -32,21 +32,21 @@ public class Game extends Canvas implements Runnable {
 	
 	private Thread thread;
 	//handles the ticking and rendering of all GameObjects
-	private GameObjectHandler objectHandler;
+	private GameObjectHandler gameObjectHandler;
 	
 	private boolean running = false;
 	
 	//the player
-	private Player player;
+	private final Player player;
 	//the game (player's) money
 	private int money = 0;
 	//the menu handler. Includes shop, titlescreen, endscreen, pause, help, etc
-	MenuHandler menuHandler;
+	private final MenuHandler menuHandler;
 	//Factories
-	private ZombieFactory zombieFactory;
-	private GroundItemFactory groundItemFactory;
+	private final ZombieSpawner zombieSpawner;
+	private final GroundItemSpawner groundItemSpawner;
 	//player HUD (health grenade/bullet count)
-	private PlayerHUD playerHUD;
+	private final PlayerHUD playerHUD;
 	//starts the game in the title screen
 	private GameState state = GameState.TitleScreen;
 	
@@ -64,22 +64,27 @@ public class Game extends Canvas implements Runnable {
 	public Game()
 	{
 		//initializing handler
-		objectHandler = new GameObjectHandler();
+		gameObjectHandler = new GameObjectHandler();
 		//initializing player. x,y,handler
-		player = new Player(WIDTH/2, HEIGHT/2, 50, objectHandler);
-		//initializing menu and passing this Game instance as the arg
-		menuHandler = new MenuHandler(this);
+		player = new Player(WIDTH/2, HEIGHT/2, this);
+		//initializing menu and adding the shop as a keylistener
+		addKeyListener((menuHandler = new MenuHandler(this)).getShop());
 		//initializing the player's HUD
 		playerHUD = new PlayerHUD(player);
+		//initializing the zombie spawner
+		zombieSpawner = new ZombieSpawner(this, gameObjectHandler, player);
+		//initializing the groundItem spawner
+		groundItemSpawner = new GroundItemSpawner(this, gameObjectHandler, player);
 		//adding a key listener (which controls all movement) and a mouse motion listener (which is the player, its used for shooting)
-		this.addKeyListener(new KeyInputHandler(this, objectHandler));
+		addKeyListener(new KeyInputHandler(this, gameObjectHandler));
 		//adds the mouse listener
 		Mouse mouse = new Mouse();
-		this.addMouseListener(mouse);
-		this.addMouseMotionListener(mouse);		
+		addMouseListener(mouse);
+		addMouseMotionListener(mouse);		
 		//creating the window
 		createWindow("Attack of the Zombies");
-		this.start();
+		//starts the thread
+		start();
 	}
 	
 
@@ -140,13 +145,11 @@ public class Game extends Canvas implements Runnable {
 		{
 			case Game:
 				//ticks all GameObjects
-				objectHandler.tick();
-				//Spawns a zombie on any of the 4 sides
-				zombieFactory.spawnZombies();
-				//spawns in ground items anywhere
-				groundItemFactory.spawnGroundItems();
-				//ends the game if the player dies
-				if(player.getHealth() <= 0) endGame();
+				gameObjectHandler.tick();
+				// tries to Spawn a zombie on any of the 4 sides
+				zombieSpawner.trySpawnZombie();
+				//tries spawns ground items anywhere
+				groundItemSpawner.trySpawnGroundItems();
 				break;
 				
 			//when the STATE is equal to a menu item, menu is ticked, which then ticks the corrosponding instances of the other gui classes
@@ -192,11 +195,11 @@ public class Game extends Canvas implements Runnable {
 				g.setColor(Color.LIGHT_GRAY);
 				g.fillRect(0, 0, WIDTH, HEIGHT);
 				//renders all GameObjects
-				objectHandler.render(g);
+				gameObjectHandler.render(g);
 				//draws the dividing lines (temperary)
 				g.setColor(Color.BLACK);
-				g.drawLine(Game.WIDTH/2, 0, Game.WIDTH/2, Game.HEIGHT);
-				g.drawLine(0, Game.HEIGHT/2, Game.WIDTH, Game.HEIGHT/2);
+				//g.drawLine(Game.WIDTH/2, 0, Game.WIDTH/2, Game.HEIGHT);
+				//g.drawLine(0, Game.HEIGHT/2, Game.WIDTH, Game.HEIGHT/2);
 				//renders the player's health and greande/bullet count
 				playerHUD.render(g);
 				//displays player money in top right corner
@@ -213,9 +216,11 @@ public class Game extends Canvas implements Runnable {
 				menuHandler.render(g);
 				break;
 		}
+	
 		g.dispose();
 		bs.show();
 		
+		//used for fullscreen
 		if(KeyInputHandler.changeFullScreen)
 		{
 			JFrame frame = getFrame();
@@ -263,18 +268,17 @@ public class Game extends Canvas implements Runnable {
 	//called when game starts or resets bc of a Play Again or restart button
 	public void startGame()
 	{
-		objectHandler.gameObjects.clear();
-		objectHandler.addObject(player);
+		gameObjectHandler.gameObjects.clear();
+		gameObjectHandler.addObject(player);
 		money = 0;
 		player.reset();
 		menuHandler.reset();
 		state = GameState.Game;
-		if(zombieFactory == null) zombieFactory = new ZombieFactory(this, objectHandler, player);
-		if(groundItemFactory == null) groundItemFactory = new GroundItemFactory(this, objectHandler, player);
-		zombieFactory.reset();
+		zombieSpawner.reset();
 	}
+	
 	//when the player dies
-	private void endGame()
+	public void endGame()
 	{
 		state = GameState.EndScreen;
 	}
@@ -307,5 +311,21 @@ public class Game extends Canvas implements Runnable {
 	public JFrame getFrame()
 	{
 		return frame;
+	}
+	
+	public PlayerHUD getPlayerHUD()
+	{
+		return playerHUD;
+	}
+	
+	public GameObjectHandler getObjectHandler()
+	{ 
+		return gameObjectHandler;
+	}
+
+	public GameObjectHandler getObjectHandler(String string) 
+	{
+		System.out.println("Player retreives the handler");
+		return gameObjectHandler;
 	}
 }

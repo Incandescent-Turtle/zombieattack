@@ -16,9 +16,7 @@ import game.zombieattack.main.util.Util;
 @SuppressWarnings("incomplete-switch")
 public class MenuHandler {
 
-	/*
-		Declaring menu types
-	*/
+	//Declaring menu types
 	private TitleScreen titleScreen;
 	private EndScreen endScreen;
 	private Shop shop;
@@ -98,5 +96,10 @@ public class MenuHandler {
 	public void reset()
 	{
 		shop.reset();
+	}
+	
+	public Shop getShop()
+	{
+		return shop;
 	}
 }

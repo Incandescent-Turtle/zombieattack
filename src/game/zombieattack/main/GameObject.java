@@ -1,32 +1,36 @@
 package game.zombieattack.main;
 
-import java.awt.Graphics2D; 
+import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
 import game.zombieattack.main.handlers.GameObjectHandler;
 import game.zombieattack.main.util.Util;
  
 //an abstract class that all GameObjects extend (Bullet, Player, Zombie)
-public abstract class GameObject {
+public abstract class GameObject 
+{
 
-	protected  int width, height;
+	protected int width, height;
 	//doubles for precision
 	protected double xPos, yPos;
-	protected GameObjectHandler handler;
+	protected final GameObjectHandler handler;
+
+	protected final Game game;
 	
-	public GameObject(double xPos, double yPos, int width, int height, GameObjectHandler handler)
+	public GameObject(double xPos, double yPos, int width, int height, Game game)
 	{
 		this.xPos = xPos;
 		this.yPos = yPos;
-		this.handler = handler;
+		this.handler = game.getObjectHandler();
 		this.width = width;
 		this.height = height;
+		this.game = game;
 	}
 	
 	//used for objects that have equal length and height
-	public GameObject(double xPos, double yPos, int size, GameObjectHandler handler)
+	public GameObject(double xPos, double yPos, int size, Game game)
 	{
-		this(xPos, yPos, size, size, handler);
+		this(xPos, yPos, size, size, game);
 	}
 	
 	//called in handler every game tick
