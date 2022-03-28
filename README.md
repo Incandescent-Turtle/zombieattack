@@ -13,8 +13,8 @@ This is a re-make of my scratch game: [https://scratch.mit.edu/projects/21946134
 ---
 ## 🎲 Basic Gamplay
 [Zombies](#-zombie-types) pour in from all four sides of your screen.  
-If they hit you, you will lose help. 
-Shoot them or hit them with [grenades](#-grenades)!
+If they hit you, you will lose health.  
+Shoot them or hit them with [grenades](#-grenades)!  
 Collect [items](#-ground-items) on the ground and buy things in the shop to help you out.
 
 ---
@@ -29,7 +29,7 @@ Collect [items](#-ground-items) on the ground and buy things in the shop to help
  
 ### 💻 Dev Controls
 - N to spawn a [boss](#boss-zombie)
-- F to increase money by 14140
+- F to increase money by $14140
 
 ---
 <details>
@@ -45,7 +45,7 @@ Collect [items](#-ground-items) on the ground and buy things in the shop to help
   Speed: 3 <br> 
   Damage: 2 <br> 
   Health: 20  <br>
-  Death $$: $5 by gun,  $2 by grenade
+  Reward: $5 by gun,  $2 by grenade
 
   <hr width="50%">
 
@@ -54,7 +54,7 @@ Collect [items](#-ground-items) on the ground and buy things in the shop to help
   Speed: 3 <br> 
   Damage: 1 <br> 
   Health: 10 <br>
-  Death $$: $5 by gun,  $2 by grenade
+  Reward: $5 by gun,  $2 by grenade
 
   <hr width="50%">
 
@@ -63,7 +63,7 @@ Collect [items](#-ground-items) on the ground and buy things in the shop to help
   Speed: 2 <br> 
   Damage: 4 <br> 
   Health: 40  <br>
-  Death $$: $5 by gun,  $2 by grenade
+  Reward: $5 by gun,  $2 by grenade
 
   <hr width="50%">
   
@@ -72,7 +72,7 @@ Collect [items](#-ground-items) on the ground and buy things in the shop to help
   Speed: 2 <br> 
   Damage: 25 <br> 
   Health: 100  <br>
-  Death $$: $1000 by gun,  $800 by grenade
+  Reward: $1000 by gun,  $800 by grenade
 
 </details>
 
