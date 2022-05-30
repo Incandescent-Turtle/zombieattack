@@ -1,7 +1,7 @@
 # 🎮 Zombie Attack
 A game like diep or surviv.  
 In this game you try to fight off a never ending hoard of zombies while collecting money to upgrade your player and weapons.  
-<a href="https://github.com/Incandescent-Turtle/zombieattack/raw/main/Attack%20of%20the%20Zombies.jar" download>Click to  the runnable jar file</a>
+<a href="https://github.com/Incandescent-Turtle/zombieattack/raw/main/Attack%20of%20the%20Zombies.jar" download>Click here to  the runnable jar file</a>
 ![example](https://user-images.githubusercontent.com/59327500/160268176-d4f795cf-91b9-427e-b8ae-0f31ff9242a9.gif)
 
 ---
